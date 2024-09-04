@@ -15,7 +15,7 @@ void initialize_board(designSudoku board){
         }
         cout<<endl;
     }
-    for(int i=0)
+
 }
 int main(){
 
