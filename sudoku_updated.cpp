@@ -14,7 +14,7 @@ public:
 };
 void fill_values(designSudoku &board)
 {
-    int count=0;
+    int count = 0;
     int x, y, value;
     srand(time(0));
     cout << "Values will be displayed here:-";
@@ -25,9 +25,9 @@ void fill_values(designSudoku &board)
         value = rand() % 9 + 1;
         if (board.main_board[y - 1][x - 1] == 0)
         {
-            cout << value << " at (" << y << ", " << x << ")\n";
+            // cout << value << " at (" << y << ", " << x << ")\n";
             count++;
-            board.main_board[y-1][x-1]=value;
+            board.main_board[y - 1][x - 1] = value;
             board.board_input[y - 1][x - 1] = true;
             board.row[y - 1][value - 1] = true;
             board.column[x - 1][value - 1] = true;
@@ -45,7 +45,7 @@ void fill_values(designSudoku &board)
             board.singledimensionboard[9 * i + j] = board.main_board[i][j];
         }
     }
-    cout<<count<<endl;
+    cout << count << endl;
 }
 void initialize_board(designSudoku &board)
 {
@@ -102,6 +102,33 @@ void display_board(designSudoku &board)
         cout << endl;
     }
 }
+void calculate_solution(designSudoku &board)
+{
+    int positionatcell = 0;
+    bool cellPassed = false;
+    while (positionatcell <= 80)
+    {
+        cout << positionatcell << " " << endl;
+        cellPassed = true;
+        if (board.board_input[positionatcell / 9][positionatcell % 9])
+        {
+            positionatcell++;
+            cellPassed = true;
+        }
+        int currentcellvalue = board.singledimensionboard[positionatcell];
+        resetthevalue(currentcellvalue, board);
+    }
+}
+void resetthevalue(int currentcellpostion, designSudoku &board)
+{
+    if (!board.singledimensionboard[currentcellpostion])
+        return;
+    int valueneedtoreset = board.singledimensionboard[currentcellpostion];
+    board.row[currentcellpostion / 9][valueneedtoreset - 1] = false;
+    board.column[currentcellpostion % 9][valueneedtoreset - 1] = false;
+    board.squares[currentcellpostion / 27][(currentcellpostion % 9) / 3][valueneedtoreset - 1] = false;
+    board.singledimensionboard[currentcellpostion] = 0;
+}
 int main()
 {
 
@@ -109,4 +136,5 @@ int main()
     initialize_board(board);
     fill_values(board);
     display_board(board);
+    calculate_solution(board);
 }
