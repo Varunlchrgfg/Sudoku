@@ -12,6 +12,11 @@ public:
     bool squares[3][3][9];
     int singledimensionboard[81] = {0};
 };
+
+void resetthevalue(int current_cell_position, designSudoku &board);
+int cell_value(int position, int value, designSudoku &board);
+void save_value(int position, int value, designSudoku &board);
+
 void fill_values(designSudoku &board)
 {
     int count = 0;
@@ -20,18 +25,18 @@ void fill_values(designSudoku &board)
     cout << "Values will be displayed here:-";
     for (int i = 0; i < 20; i++)
     {
-        x = rand() % 9 ;
-        y = rand() % 9 ;
+        x = rand() % 9 + 1;
+        y = rand() % 9 + 1;
         value = rand() % 9 + 1;
-        if (board.main_board[y][x] == 0)
+        if (board.main_board[y - 1][x - 1] == 0)
         {
             // cout << value << " at (" << y << ", " << x << ")\n";
             count++;
-            board.main_board[y][x] = value;
-            board.board_input[y][x] = true;
-            board.row[y][value - 1] = true;
-            board.column[x][value - 1] = true;
-            board.squares[y / 3][x / 3][value - 1] = true;
+            board.main_board[y - 1][x - 1] = value;
+            board.board_input[y - 1][x - 1] = true;
+            board.row[y - 1][value - 1] = true;
+            board.column[x - 1][value - 1] = true;
+            board.squares[(y - 1) / 3][(x - 1) / 3][value - 1] = true;
         }
         else
         {
@@ -80,9 +85,9 @@ void initialize_board(designSudoku &board)
         }
     }
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 2; i++)
     {
-        for (int j = 0; j < 3; j++)
+        for (int j = 0; j < 2; j++)
         {
             for (int k = 0; k < 9; k++)
             {
@@ -105,35 +110,41 @@ void display_board(designSudoku &board)
 void calculate_solution(designSudoku &board)
 {
     int positionatcell = 0;
-    bool cellPassed = false;
-    while (positionatcell < 81)
+    while (positionatcell < 81) // Changed to < 81 for clarity
     {
-        cout << positionatcell << " " << endl;
-        cellPassed = true;
+        bool cellPassed = false; // Reset this at the beginning of the loop
+
+        // Skip cells that are pre-filled
         if (board.board_input[positionatcell / 9][positionatcell % 9])
         {
             positionatcell++;
-            continue;
+            continue; // Move to the next cell
         }
-        int currentcellvalue = board.singledimensionboard[positionatcell];
-        resetthevalue(positionatcell, board);
 
-        cout<<"-";
-        for(int i=(currentcellvalue+1);i<=9;i++){
-            if(cell_value(positionatcell,i,board)){
-                save_value(positionatcell,i,board);
-                cellPassed=true;
-                positionatcell++;
-                break;
+        resetthevalue(positionatcell, board);
+        
+        for (int i = 1; i <= 9; i++) // Check possible values from 1 to 9
+        {
+            if (cell_value(positionatcell, i, board))
+            {
+                save_value(positionatcell, i, board);
+                cellPassed = true; // Mark that we successfully placed a value
+                positionatcell++; // Move to the next cell
+                break; // Exit the for loop after placing a value
             }
         }
-        if(!cellPassed){
-        positionatcell--;
-        while(board.board_input[positionatcell/9][positionatcell%9])
-        positionatcell--;
+
+        if (!cellPassed) // If no value was placed, backtrack
+        {
+            positionatcell--; // Move back to the previous cell
+            while (positionatcell >= 0 && board.board_input[positionatcell / 9][positionatcell % 9])
+            {
+                positionatcell--; // Skip over filled cells
+            }
         }
     }
 }
+
 void save_value(int positionatcell, int i,designSudoku &board){
     board.singledimensionboard[positionatcell]=i;
     board.row[positionatcell/9][i-1]=true;
@@ -149,7 +160,7 @@ int cell_value(int positionatcell,int i,designSudoku &board){
     return 0;
     if(board.row[y][i-1]==true)
     return 0;
-    if(board.squares[y/3][x/3][i-1]==true)
+    if(board.squares[x/3][y/3][i-1]==true)
     return 0;
     else
     return 1;
