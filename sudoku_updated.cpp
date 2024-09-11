@@ -20,18 +20,18 @@ void fill_values(designSudoku &board)
     cout << "Values will be displayed here:-";
     for (int i = 0; i < 20; i++)
     {
-        x = rand() % 9 + 1;
-        y = rand() % 9 + 1;
+        x = rand() % 9 ;
+        y = rand() % 9 ;
         value = rand() % 9 + 1;
-        if (board.main_board[y - 1][x - 1] == 0)
+        if (board.main_board[y][x] == 0)
         {
             // cout << value << " at (" << y << ", " << x << ")\n";
             count++;
-            board.main_board[y - 1][x - 1] = value;
-            board.board_input[y - 1][x - 1] = true;
-            board.row[y - 1][value - 1] = true;
-            board.column[x - 1][value - 1] = true;
-            board.squares[(y - 1) / 3][(x - 1) / 3][value - 1] = true;
+            board.main_board[y][x] = value;
+            board.board_input[y][x] = true;
+            board.row[y][value - 1] = true;
+            board.column[x][value - 1] = true;
+            board.squares[y / 3][x / 3][value - 1] = true;
         }
         else
         {
@@ -80,9 +80,9 @@ void initialize_board(designSudoku &board)
         }
     }
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
-        for (int j = 0; j < 2; j++)
+        for (int j = 0; j < 3; j++)
         {
             for (int k = 0; k < 9; k++)
             {
@@ -106,18 +106,53 @@ void calculate_solution(designSudoku &board)
 {
     int positionatcell = 0;
     bool cellPassed = false;
-    while (positionatcell <= 80)
+    while (positionatcell < 81)
     {
         cout << positionatcell << " " << endl;
         cellPassed = true;
         if (board.board_input[positionatcell / 9][positionatcell % 9])
         {
             positionatcell++;
-            cellPassed = true;
+            continue;
         }
         int currentcellvalue = board.singledimensionboard[positionatcell];
-        resetthevalue(currentcellvalue, board);
+        resetthevalue(positionatcell, board);
+
+        cout<<"-";
+        for(int i=(currentcellvalue+1);i<=9;i++){
+            if(cell_value(positionatcell,i,board)){
+                save_value(positionatcell,i,board);
+                cellPassed=true;
+                positionatcell++;
+                break;
+            }
+        }
+        if(!cellPassed){
+        positionatcell--;
+        while(board.board_input[positionatcell/9][positionatcell%9])
+        positionatcell--;
+        }
     }
+}
+void save_value(int positionatcell, int i,designSudoku &board){
+    board.singledimensionboard[positionatcell]=i;
+    board.row[positionatcell/9][i-1]=true;
+    board.column[positionatcell%9][i-1]=true;
+    board.squares[positionatcell/27][(positionatcell%9)/3][i-1]=true;
+}
+int cell_value(int positionatcell,int i,designSudoku &board){
+    int y=0,x=0;
+    y=positionatcell/9;
+    x=positionatcell%9;
+
+    if(board.column[x][i-1]==true)
+    return 0;
+    if(board.row[y][i-1]==true)
+    return 0;
+    if(board.squares[y/3][x/3][i-1]==true)
+    return 0;
+    else
+    return 1;
 }
 void resetthevalue(int currentcellpostion, designSudoku &board)
 {
